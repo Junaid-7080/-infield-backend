@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Infield Backend API
 
 FastAPI-based backend for Infield form management and approval system.
@@ -395,3 +396,7 @@ For issues and questions:
 - Documentation: http://localhost:8000/docs
 - Email: support@infield.com
 "# -infield-backend" 
+=======
+# infield_backend
+Fastapi backend 
+>>>>>>> 54ee5dc6f14e94b7bd5627ff5cdc919d777bc332
