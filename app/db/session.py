@@ -1,19 +1,25 @@
 """
 Database session management with async SQLAlchemy.
 """
+from typing import AsyncGenerator
 from sqlalchemy.engine import make_url
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
 from sqlalchemy.orm import declarative_base
 from app.core.config import settings
 
+# Fix DATABASE_URL to use asyncpg driver for async support
+database_url = settings.DATABASE_URL
+if database_url.startswith("postgresql://"):
+    database_url = database_url.replace("postgresql://", "postgresql+asyncpg://", 1)
+
 # Create async engine with connection pooling for non-SQLite databases
-database_url = make_url(settings.DATABASE_URL)
+url_obj = make_url(database_url)
 
 engine_kwargs = {
     "echo": settings.DEBUG,
 }
 
-if not database_url.drivername.startswith("sqlite"):
+if not url_obj.drivername.startswith("sqlite"):
     engine_kwargs.update(
         pool_size=10,       # Connections to keep open
         max_overflow=20,    # Additional connections above pool_size
@@ -23,7 +29,7 @@ if not database_url.drivername.startswith("sqlite"):
     )
 
 engine = create_async_engine(
-    settings.DATABASE_URL,
+    database_url,  # Use fixed URL here
     **engine_kwargs,
 )
 
@@ -40,7 +46,7 @@ AsyncSessionLocal = async_sessionmaker(
 Base = declarative_base()
 
 
-async def get_db() -> AsyncSession:
+async def get_db() -> AsyncGenerator[AsyncSession, None]:
     """
     Dependency that provides database session to routes.
 
